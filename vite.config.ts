@@ -5,13 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
-    // 1. The official compiler orchestrator matching your 1.168.x production lock layer
+    // 1. Core compiler matching locked meta-framework specifications
     tanstackStartVite({
       server: { entry: "server" }
     }),
     // 2. Compiles Tailwind CSS v4 layers
     tailwindcss(),
-    // 3. Resolves background folder structures
+    // 3. Resolves asset mappings like "@/*"
     tsconfigPaths(),
   ],
 });
