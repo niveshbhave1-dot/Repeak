@@ -4,13 +4,7 @@ I have attached a file and it has an assignment can you build and  mobile first 
 
 it should reflect adventure feeling.. should be inviting and unique and best in world, world class design
 
-This project was built with [Lovable](https://lovable.dev).
-
 **Live app**: https://adventure-voyage-interface.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6d7f83f9-6da6-4b3c-ac84-7a61b635e11e).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.
