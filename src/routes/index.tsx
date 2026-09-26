@@ -1,24 +1,134 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Bell, Bookmark, CalendarDays, Check, ChevronDown, ChevronRight, Clock3, Heart, MapPin, MessageCircle, MoreHorizontal, Plus, Search, Share2, SlidersHorizontal, Trophy, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CompassIcon, PeakMark, RepeakCoin, SummitIcon, TrailIcon, Wordmark } from '@/components/repeak/brand';
+import ridgeImage from '@/assets/ridge-runners.jpg';
+import athleteImage from '@/assets/athlete-trail.jpg';
+import cyclingImage from '@/assets/cycling-club.jpg';
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
+type View = 'feed' | 'discover' | 'rewards' | 'profile' | 'organizer';
+type Tab = 'For you' | 'Following' | 'Challenges';
+
+export const Route = createFileRoute('/')({
+  head: () => ({ meta: [
+    { title: 'Repeak — Go further, together' },
+    { name: 'description', content: 'The home for people who find their people outside. Discover endurance challenges, celebrate the miles, and move together.' },
+    { property: 'og:title', content: 'Repeak — Go further, together' },
+    { property: 'og:description', content: 'Discover endurance challenges, celebrate the miles, and move together.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+  ] }),
+  component: RepeakApp,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+const people = [
+  { name: 'Maya', initials: 'MY', color: 'avatar-coral' },
+  { name: 'Leo', initials: 'LE', color: 'avatar-green' },
+  { name: 'Noah', initials: 'NO', color: 'avatar-blue' },
+  { name: 'Ava', initials: 'AV', color: 'avatar-violet' },
+];
+
+function Avatar({ initials, color = 'avatar-coral', size = 'normal' }: { initials: string; color?: string; size?: 'normal' | 'small' | 'large' }) {
+  return <span className={`avatar ${color} ${size === 'small' ? 'avatar-small' : size === 'large' ? 'avatar-large' : ''}`} aria-label={initials}>{initials}</span>;
+}
+
+function SectionHeader({ eyebrow, title, action, onAction }: { eyebrow: string; title: string; action?: string; onAction?: () => void }) {
+  return <div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div>{action && <Button variant="ghost" className="text-link" onClick={onAction}>{action}<ArrowUpRight size={16} /></Button>}</div>;
+}
+
+function ChallengeCard({ joined, onJoin, onOpen, compact = false }: { joined: boolean; onJoin: () => void; onOpen: () => void; compact?: boolean }) {
+  return <article className={`challenge-card ${compact ? 'challenge-compact' : ''}`}>
+    <img src={ridgeImage} alt="Two runners crossing a mountain ridgeline at sunrise" width={1536} height={1024} className="challenge-photo" />
+    <div className="challenge-shade" />
+    <div className="challenge-content">
+      <div className="challenge-top"><span className="challenge-tag"><span className="live-dot" /> FEATURED CHALLENGE</span><span className="challenge-countdown"><Clock3 size={13} /> 12 DAYS LEFT</span></div>
+      <div className="challenge-bottom"><div className="challenge-copy"><span className="challenge-index">01 / THE MOUNTAIN SERIES</span><h2>Chase the<br/><em>higher ground.</em></h2><p>Climb 2,000 m this month. Every ascent counts.</p></div>
+        <div className="challenge-footer"><div className="challenge-participants"><div className="avatar-stack">{people.slice(0, 3).map(p => <Avatar key={p.name} initials={p.initials} color={p.color} size="small" />)}</div><span>1.2k out there with you</span></div><Button onClick={(e) => { e.stopPropagation(); onJoin(); }} className={`join-button ${joined ? 'joined-button' : ''}`}>{joined ? <><Check size={17}/> Joined</> : <>Join the climb <ArrowUpRight size={17}/></>}</Button></div>
+      </div>
     </div>
-  );
+    <Button variant="ghost" aria-label="View challenge details" className="challenge-open" onClick={onOpen} />
+  </article>;
+}
+
+function ActivityCard({ liked, onLike, saved, onSave }: { liked: boolean; onLike: () => void; saved: boolean; onSave: () => void }) {
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<string[]>([]);
+  return <article className="activity-card">
+    <div className="activity-author"><Avatar initials="MC" color="avatar-coral" /><div className="author-meta"><strong>Maya Chen <span className="verified">✦</span></strong><span>Trail runner · 2 hours ago</span></div><Button variant="ghost" size="icon" aria-label="More activity options" className="icon-quiet" onClick={onSave}><MoreHorizontal size={20}/></Button></div>
+    <p className="activity-caption">Some mornings remind you why you started. Legs were tired, but the view had other plans. <span>#FindYourPeak</span></p>
+    <div className="activity-image-wrap"><img src={athleteImage} alt="Maya running on a rocky alpine trail" width={1024} height={1280} loading="lazy" /><span className="image-stamp"><TrailIcon width={18} height={18}/> TRAIL RUN</span></div>
+    <div className="activity-stats"><div className="stat"><span>12.4</span><small>KM</small></div><div className="stat"><span>842</span><small>M ELEVATION</small></div><div className="stat"><span>1:28</span><small>MOVING TIME</small></div><span className="verified-activity"><Check size={12} /> VERIFIED</span></div>
+    <div className="activity-actions"><Button variant="ghost" className={`action-button ${liked ? 'active-like' : ''}`} onClick={onLike} aria-label={liked ? 'Remove kudos' : 'Give kudos'}><Heart size={19} fill={liked ? 'currentColor' : 'none'}/><span>{liked ? '185' : '184'}</span></Button><Button variant="ghost" className="action-button" onClick={() => setCommentsOpen(!commentsOpen)} aria-label="Show comments"><MessageCircle size={19}/><span>{comments.length + 12}</span></Button><Button variant="ghost" className="action-button" onClick={() => { if (navigator.share) navigator.share({ title: 'Maya’s trail run', url: location.href }).catch(() => {}); else navigator.clipboard?.writeText(location.href); }} aria-label="Share activity"><Share2 size={18}/></Button><Button variant="ghost" className={`action-button action-save ${saved ? 'is-saved' : ''}`} onClick={onSave} aria-label={saved ? 'Unsave activity' : 'Save activity'}><Bookmark size={19} fill={saved ? 'currentColor' : 'none'}/></Button></div>
+    {commentsOpen && <div className="comments-panel"><p><strong>Leo Martin</strong> That view is unreal. Strong climb! 🙌</p>{comments.map((c, i) => <p key={i}><strong>You</strong> {c}</p>)}<form onSubmit={e => { e.preventDefault(); if (comment.trim()) { setComments([...comments, comment.trim()]); setComment(''); } }}><input value={comment} onChange={e => setComment(e.target.value)} placeholder="Leave some encouragement..." aria-label="Write a comment"/><Button type="submit" size="icon" aria-label="Post comment"><ArrowRight size={18}/></Button></form></div>}
+  </article>;
+}
+
+function RideCard({ liked, onLike }: { liked: boolean; onLike: () => void }) {
+  return <article className="ride-card"><div className="activity-author"><Avatar initials="LM" color="avatar-green"/><div className="author-meta"><strong>Leo Martin</strong><span>with Northside Cycle Club · Yesterday</span></div><Button variant="ghost" size="icon" className="icon-quiet" aria-label="More ride options"><MoreHorizontal size={20}/></Button></div><p className="activity-caption">Sunday miles are better with good company. Same time next week?</p><div className="ride-photo"><img src={cyclingImage} alt="Cyclists riding through the mountains together" width={1280} height={768} loading="lazy"/><div className="ride-photo-label"><span><CompassIcon width={17} height={17}/> CLUB RIDE</span><strong>THE LONG WAY HOME</strong></div></div><div className="ride-bottom"><div className="ride-metrics"><span><strong>68.2</strong> km</span><span><strong>720</strong> m climb</span></div><Button variant="ghost" className={`action-button ${liked ? 'active-like' : ''}`} onClick={onLike} aria-label={liked ? 'Remove kudos' : 'Give kudos'}><Heart size={19} fill={liked ? 'currentColor' : 'none'}/>{liked ? 97 : 96}</Button></div></article>;
+}
+
+function ProgressPanel({ joined, onOpen }: { joined: boolean; onOpen: () => void }) {
+  return <div className="progress-panel"><div className="panel-top"><span className="eyebrow">YOUR ASCENT</span><SummitIcon width={23} height={23}/></div><h3>{joined ? 'Keep climbing.' : 'Your next summit awaits.'}</h3><p>{joined ? 'The mountain is yours to make.' : 'Join a challenge and make every step count.'}</p><div className="progress-numbers"><strong>{joined ? '680' : '0'} <small>/ 2,000 m</small></strong><span>{joined ? '34%' : '0%'}</span></div><div className="progress-track"><div style={{ width: joined ? '34%' : '0%' }}/></div><Button variant="ghost" onClick={onOpen} className="panel-link">View challenge <ArrowUpRight size={16}/></Button></div>;
+}
+
+function RightRail({ joined, onOpen, setView }: { joined: boolean; onOpen: () => void; setView: (v: View) => void }) {
+  return <aside className="right-rail"><div className="rail-intro"><span className="eyebrow">YOUR SPACE / 01</span><p>Better together.<br/><em>Further always.</em></p></div><ProgressPanel joined={joined} onOpen={onOpen}/><div className="rail-block"><div className="rail-title"><span className="eyebrow">IN YOUR ORBIT</span><Button variant="ghost" className="rail-arrow" aria-label="Discover people" onClick={() => setView('discover')}><ArrowUpRight size={18}/></Button></div><div className="orbit-person"><Avatar initials="SC" color="avatar-blue"/><div><strong>Sam Carter</strong><span>Just completed 100 km this month</span></div><span className="orbit-spark">↗</span></div><div className="orbit-person"><Avatar initials="JR" color="avatar-violet"/><div><strong>Jules Rivera</strong><span>Joined the Mountain Series</span></div><span className="orbit-spark">↗</span></div></div><div className="rail-event"><span className="eyebrow">COMING UP / OCT 04</span><h3>Saturday<br/>Summit Run</h3><p><MapPin size={14}/> Griffith Park, Los Angeles</p><Button variant="ghost" onClick={() => setView('discover')}>Explore events <ArrowUpRight size={16}/></Button></div><p className="rail-footer">MADE FOR THE LONG WAY ROUND. © REPEAK 2026</p></aside>;
+}
+
+function Sidebar({ view, setView }: { view: View; setView: (v: View) => void }) {
+  return <aside className="sidebar"><Wordmark className="sidebar-logo"/><p className="sidebar-kicker">THE WORLD IS YOUR COURSE.</p><nav aria-label="Main navigation" className="sidebar-nav"><Button variant="ghost" className={`sidebar-item ${view === 'feed' ? 'selected' : ''}`} onClick={() => setView('feed')}><TrailIcon width={23} height={23}/> Feed <span>01</span></Button><Button variant="ghost" className={`sidebar-item ${view === 'discover' ? 'selected' : ''}`} onClick={() => setView('discover')}><CompassIcon width={23} height={23}/> Discover <span>02</span></Button><Button variant="ghost" className={`sidebar-item ${view === 'rewards' ? 'selected' : ''}`} onClick={() => setView('rewards')}><SummitIcon width={23} height={23}/> Rewards <span>03</span></Button></nav><div className="sidebar-spacer"/><div className="sidebar-quote"><span>“</span><p>It’s not the summit.<br/>It’s who you become<br/>on the way up.</p><div className="quote-line"/></div><Button variant="ghost" className={`sidebar-profile ${view === 'profile' ? 'selected' : ''}`} onClick={() => setView('profile')}><Avatar initials="NB" color="avatar-own"/><div><strong>Your journey</strong><span>View profile</span></div><ChevronRight size={17}/></Button><Button variant="ghost" className={`organizer-switch ${view === 'organizer' ? 'selected' : ''}`} onClick={() => setView('organizer')}><span>ORGANIZER VIEW</span><ArrowUpRight size={15}/></Button></aside>;
+}
+
+function MobileNav({ view, setView }: { view: View; setView: (v: View) => void }) {
+  return <nav className="mobile-nav" aria-label="Mobile navigation"><Button variant="ghost" className={view === 'feed' ? 'current' : ''} onClick={() => setView('feed')}><TrailIcon width={24} height={24}/><span>Feed</span></Button><Button variant="ghost" className={view === 'discover' ? 'current' : ''} onClick={() => setView('discover')}><CompassIcon width={24} height={24}/><span>Discover</span></Button><Button variant="ghost" className={view === 'rewards' ? 'current' : ''} onClick={() => setView('rewards')}><SummitIcon width={24} height={24}/><span>Rewards</span></Button><Button variant="ghost" className={view === 'profile' || view === 'organizer' ? 'current' : ''} onClick={() => setView('profile')}><Avatar initials="NB" color="avatar-own" size="small"/><span>You</span></Button></nav>;
+}
+
+function Feed({ tab, setTab, joined, setJoined, openChallenge, liked, setLiked, saved, setSaved, setView }: { tab: Tab; setTab: (t: Tab) => void; joined: boolean; setJoined: (v: boolean) => void; openChallenge: () => void; liked: boolean; setLiked: (v: boolean) => void; saved: boolean; setSaved: (v: boolean) => void; setView: (v: View) => void }) {
+  return <><div className="page-heading"><div><p className="eyebrow"><span className="small-signal"/> SATURDAY, SEPTEMBER 26</p><h1>Find your <em>next.</em></h1><p className="heading-sub">Good things happen when we get out there.</p></div></div><div className="feed-tabs" role="tablist" aria-label="Feed filter">{(['For you', 'Following', 'Challenges'] as const).map(t => <Button key={t} role="tab" aria-selected={tab === t} variant="ghost" className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>{t}</Button>)}</div>
+    {tab === 'Challenges' ? <div className="feed-body"><SectionHeader eyebrow="A REASON TO GO" title="Your next adventure"/><ChallengeCard joined={joined} onJoin={() => setJoined(!joined)} onOpen={openChallenge}/><div className="mobile-progress"><ProgressPanel joined={joined} onOpen={openChallenge}/></div><SectionHeader eyebrow="MORE TO EXPLORE" title="Go together" action="See all" onAction={() => setView('discover')}/><EventStrip setView={setView}/></div> : <div className="feed-body"><SectionHeader eyebrow={tab === 'Following' ? 'FROM YOUR PEOPLE' : 'GO BEYOND'} title={tab === 'Following' ? 'Your people, moving.' : 'The adventure starts here.'} action="Explore all" onAction={() => setView('discover')}/>{tab === 'For you' && <><ChallengeCard joined={joined} onJoin={() => setJoined(!joined)} onOpen={openChallenge}/><div className="mobile-progress"><ProgressPanel joined={joined} onOpen={openChallenge}/></div></>}<SectionHeader eyebrow="FIELD NOTES / YOUR COMMUNITY" title="Out there, together." action="Following" onAction={() => setTab('Following')}/><ActivityCard liked={liked} onLike={() => setLiked(!liked)} saved={saved} onSave={() => setSaved(!saved)}/><RideCard liked={saved} onLike={() => setSaved(!saved)}/></div>}
+  </>;
+}
+
+function EventStrip({ setView }: { setView: (v: View) => void }) {
+  return <Button variant="ghost" className="event-strip" onClick={() => setView('discover')}><span className="event-date"><strong>04</strong><small>OCT</small></span><span className="event-info"><strong>Saturday Summit Run</strong><small><MapPin size={13}/> Griffith Park · Trail run · 8 km</small></span><ArrowUpRight className="event-arrow" size={19}/></Button>;
+}
+
+function Discover({ joined, setJoined, openChallenge }: { joined: boolean; setJoined: (v: boolean) => void; openChallenge: () => void }) {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('All');
+  const [eventJoined, setEventJoined] = useState(false);
+  const eventVisible = filter === 'All' || filter === 'Events';
+  const challengeVisible = filter === 'All' || filter === 'Challenges';
+  return <><div className="page-heading"><p className="eyebrow"><span className="small-signal"/> THE WORLD IS YOUR COURSE</p><h1>Go find <em>more.</em></h1><p className="heading-sub">New places. New people. A new reason to move.</p></div><div className="discover-controls"><div className="search-field"><Search size={19}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search adventures" aria-label="Search adventures"/></div><Button variant="outline" size="icon" aria-label="Filter adventures" className="filter-icon" onClick={() => setFilter(filter === 'All' ? 'Events' : filter === 'Events' ? 'Challenges' : 'All')}><SlidersHorizontal size={18}/></Button></div><div className="filter-tabs">{['All', 'Challenges', 'Events'].map(f => <Button key={f} variant="ghost" className={filter === f ? 'active' : ''} onClick={() => setFilter(f)}>{f}</Button>)}</div><div className="feed-body discover-body">{challengeVisible && (!query || 'mountain series chase higher ground climb'.includes(query.toLowerCase())) && <><SectionHeader eyebrow="GO THE DISTANCE" title="Challenges"/><ChallengeCard joined={joined} onJoin={() => setJoined(!joined)} onOpen={openChallenge} compact/></>}{eventVisible && (!query || 'saturday summit run griffith park'.includes(query.toLowerCase())) && <><SectionHeader eyebrow="MEET OUT THERE" title="Upcoming events"/><div className="discovery-event"><div className="discovery-event-image"><img src={cyclingImage} alt="Cyclists on a winding mountain road" width={1280} height={768} loading="lazy"/><span>COMMUNITY EVENT</span></div><div className="discovery-event-info"><span className="eyebrow">OCT 04 · LOS ANGELES, CA</span><h3>Saturday Summit Run</h3><p>Meet at the trailhead. Leave with a story.</p><div className="discovery-event-footer"><span><MapPin size={15}/> Griffith Park · 8 km</span><Button onClick={() => setEventJoined(!eventJoined)}>{eventJoined ? <><Check size={16}/> Going</> : <>Count me in <ArrowUpRight size={16}/></>}</Button></div></div></div></>}{query && !('mountain series chase higher ground climb saturday summit run griffith park'.includes(query.toLowerCase())) && <p className="empty-state">No adventures found. Try a different search.</p>}</div></>;
+}
+
+function Rewards({ joined, openChallenge }: { joined: boolean; openChallenge: () => void }) {
+  return <><div className="page-heading"><p className="eyebrow"><span className="small-signal"/> EVERY MILE MEANS SOMETHING</p><h1>Earn your <em>story.</em></h1><p className="heading-sub">Your effort deserves to be remembered.</p></div><div className="reward-display"><div className="reward-halo"><RepeakCoin className="reward-coin"/></div><p className="eyebrow">THE REPEAK COIN</p><h2>Proof you showed up.</h2><p>Earn coins by showing up, completing challenges, and going further with your community.</p><div className="reward-balance"><strong>{joined ? '120' : '0'}</strong><span>COINS EARNED</span></div></div><div className="feed-body"><SectionHeader eyebrow="THE ROAD AHEAD" title="Your milestones"/><div className="milestone-list"><div><span className="milestone-icon"><TrailIcon width={23} height={23}/></span><div><strong>First steps</strong><small>Complete your first challenge</small></div><span className="milestone-status">{joined ? 'IN PROGRESS' : 'NOT STARTED'}</span></div><div><span className="milestone-icon"><SummitIcon width={23} height={23}/></span><div><strong>Peak performer</strong><small>Climb 2,000 m in a month</small></div><span className="milestone-status">LOCKED</span></div></div><Button className="wide-cta" onClick={openChallenge}>Explore the Mountain Series <ArrowUpRight size={17}/></Button></div></>;
+}
+
+function Profile({ joined, setView }: { joined: boolean; setView: (v: View) => void }) {
+  return <><div className="page-heading"><p className="eyebrow"><span className="small-signal"/> YOUR JOURNEY</p><h1>Keep <em>going.</em></h1><p className="heading-sub">This is where all your miles add up.</p></div><div className="profile-block"><Avatar initials="NB" color="avatar-own" size="large"/><h2>Welcome, adventurer.</h2><p>The trail is better with you on it.</p><div className="profile-metrics"><div><strong>{joined ? '1' : '0'}</strong><span>CHALLENGES</span></div><div><strong>{joined ? '120' : '0'}</strong><span>COINS</span></div><div><strong>{joined ? '680' : '0'}</strong><span>METERS CLIMBED</span></div></div></div><div className="feed-body"><SectionHeader eyebrow="YOUR NEXT MOVE" title="Make it count"/><Button variant="outline" className="profile-row" onClick={() => setView('discover')}><CompassIcon width={23} height={23}/> Find a challenge <ArrowUpRight size={18}/></Button><Button variant="outline" className="profile-row" onClick={() => setView('organizer')}><CalendarDays size={22}/> Switch to organizer view <ArrowUpRight size={18}/></Button></div></>;
+}
+
+function Organizer({ joined, setView }: { joined: boolean; setView: (v: View) => void }) {
+  const [organizerTab, setOrganizerTab] = useState<'Overview' | 'Participants'>('Overview');
+  return <div className="organizer-page"><div className="organizer-top"><div><p className="eyebrow">REPEAK / ORGANIZER STUDIO</p><h1>Mountain Series <span>↗</span></h1><p>See how your community is moving.</p></div><Button variant="outline" onClick={() => setView('feed')}><ArrowDownRight size={17}/> Athlete view</Button></div><div className="organizer-tabs">{(['Overview', 'Participants'] as const).map(t => <Button key={t} variant="ghost" className={organizerTab === t ? 'active' : ''} onClick={() => setOrganizerTab(t)}>{t}</Button>)}</div>{organizerTab === 'Overview' ? <><div className="organizer-metrics"><div><span>PARTICIPANTS</span><strong>{joined ? '1,249' : '1,248'}</strong><small><ArrowUpRight size={14}/> +18.4% this week</small></div><div><span>TOTAL ELEVATION</span><strong>824k <small>m</small></strong><small><ArrowUpRight size={14}/> +12.8% this week</small></div><div><span>COMPLETION RATE</span><strong>68<small>%</small></strong><small><ArrowUpRight size={14}/> +4.2% this week</small></div></div><div className="organizer-content"><div className="organizer-component"><div className="organizer-component-head"><span className="eyebrow">CHALLENGE / ACTIVE</span><span className="organizer-live"><span className="live-dot"/> LIVE</span></div><div className="organizer-component-body"><img src={ridgeImage} alt="Mountain Series participants running a ridge" width={1536} height={1024} loading="lazy"/><div><span className="eyebrow">THE MOUNTAIN SERIES</span><h2>Chase the higher ground.</h2><p>Climb 2,000 m this month. Every ascent counts.</p><div className="organizer-progress"><div><span>Participants</span><strong>{joined ? '1,249' : '1,248'}</strong></div><div><span>Days remaining</span><strong>12</strong></div></div></div></div></div><div className="organizer-insight"><span className="eyebrow">THE BIG PICTURE</span><h3>A little further, every day.</h3><p>Your community has climbed the equivalent of <strong>93 Mount Everests</strong> so far. That’s what showing up looks like.</p><div className="insight-graphic"><span/><span/><span/><span/><span/><span/><span/><span/><span/><span/><span/><span/></div><small>PARTICIPATION / LAST 12 DAYS</small></div></div></> : <div className="participant-list"><div className="participant-list-head"><span>ATHLETE</span><span>PROGRESS</span><span>STATUS</span></div>{[{ name: 'Maya Chen', initials: 'MC', color: 'avatar-coral', progress: '1,840 m', status: 'On track' }, { name: 'Leo Martin', initials: 'LM', color: 'avatar-green', progress: '1,320 m', status: 'On track' }, { name: 'Sam Carter', initials: 'SC', color: 'avatar-blue', progress: '980 m', status: 'Building' }, ...(joined ? [{ name: 'You', initials: 'NB', color: 'avatar-own', progress: '680 m', status: 'Building' }] : [])].map(p => <div key={p.name} className="participant-row"><span><Avatar initials={p.initials} color={p.color} size="small"/>{p.name}</span><strong>{p.progress}</strong><small>{p.status}</small></div>)}</div>}</div>;
+}
+
+function ChallengeDialog({ joined, onJoin, onClose }: { joined: boolean; onJoin: () => void; onClose: () => void }) {
+  return <div className="dialog-backdrop" onMouseDown={onClose}><div className="challenge-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-title" onMouseDown={e => e.stopPropagation()}><div className="dialog-image"><img src={ridgeImage} alt="Runners on a mountain ridge" width={1536} height={1024}/><Button variant="ghost" size="icon" className="dialog-close" onClick={onClose} aria-label="Close challenge details"><X size={20}/></Button></div><div className="dialog-body"><span className="eyebrow"><span className="small-signal"/> THE MOUNTAIN SERIES / SEPTEMBER</span><h2 id="challenge-title">Chase the<br/><em>higher ground.</em></h2><p>There’s no single way to reach the top. Run, ride, or hike your way to 2,000 meters of elevation this month. Every ascent counts, and every effort brings the community higher.</p><div className="dialog-facts"><div><SummitIcon width={22} height={22}/><strong>2,000 m</strong><span>ELEVATION GOAL</span></div><div><Clock3 size={22}/><strong>12 days</strong><span>REMAINING</span></div><div><Trophy size={22}/><strong>120</strong><span>COINS TO EARN</span></div></div><Button className="dialog-join" onClick={onJoin}>{joined ? <><Check size={18}/> You’re in — keep climbing</> : <>Join the climb <ArrowUpRight size={18}/></>}</Button><p className="dialog-footnote">Open to all. Wherever you move, you belong here.</p></div></div></div>;
+}
+
+function RepeakApp() {
+  const [view, setView] = useState<View>('feed');
+  const [tab, setTab] = useState<Tab>('For you');
+  const [joined, setJoined] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [challengeOpen, setChallengeOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const navigate = (v: View) => { setView(v); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  return <div className={`app-shell ${view === 'organizer' ? 'organizer-shell' : ''}`}><Sidebar view={view} setView={navigate}/><div className="app-content"><header className="mobile-header"><Wordmark/><div className="mobile-header-actions"><Button variant="ghost" size="icon" aria-label="Notifications" onClick={() => setNotificationsOpen(!notificationsOpen)}><Bell size={21}/><span className="notification-dot"/></Button><Button variant="ghost" className="mobile-header-avatar" onClick={() => navigate('profile')} aria-label="Your profile"><Avatar initials="NB" color="avatar-own" size="small"/></Button></div></header><div className="desktop-topbar"><span>REPEAK / {view === 'feed' ? 'THE FEED' : view.toUpperCase()}</span><div><span>GO OUTSIDE. GO FURTHER.</span><Button variant="ghost" size="icon" aria-label="Notifications" onClick={() => setNotificationsOpen(!notificationsOpen)}><Bell size={19}/><span className="notification-dot"/></Button></div></div>{notificationsOpen && <div className="notification-popover"><div><strong>Notifications</strong><Button variant="ghost" size="icon" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}><X size={16}/></Button></div><p><span className="small-signal"/> The Mountain Series is underway. Your next adventure is waiting.</p></div>}<main className="main-column">{view === 'feed' && <Feed tab={tab} setTab={setTab} joined={joined} setJoined={setJoined} openChallenge={() => setChallengeOpen(true)} liked={liked} setLiked={setLiked} saved={saved} setSaved={setSaved} setView={navigate}/>}{view === 'discover' && <Discover joined={joined} setJoined={setJoined} openChallenge={() => setChallengeOpen(true)}/>}{view === 'rewards' && <Rewards joined={joined} openChallenge={() => setChallengeOpen(true)}/>}{view === 'profile' && <Profile joined={joined} setView={navigate}/>}{view === 'organizer' && <Organizer joined={joined} setView={navigate}/>}</main></div>{view !== 'organizer' && <RightRail joined={joined} onOpen={() => setChallengeOpen(true)} setView={navigate}/>}<MobileNav view={view} setView={navigate}/>{challengeOpen && <ChallengeDialog joined={joined} onJoin={() => setJoined(!joined)} onClose={() => setChallengeOpen(false)}/>}</div>;
 }
