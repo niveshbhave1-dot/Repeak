@@ -1,20 +1,20 @@
 import { defineConfig } from 'vite';
-import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
-import { TanStackStartVite } from '@tanstack/react-start';
+import { tanstackRouterVite } from '@tanstack/router-plugin/vite';
+import { tanstackStartVite } from '@tanstack/react-start/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
-    // 1. Handles routing code-generation
-    TanStackRouterVite(),
-    // 2. Handles full-stack SSR routing using the strict PascalCase export
-    TanStackStartVite({
+    // 1. Handles strict routing code-generation paths
+    tanstackRouterVite(),
+    // 2. Handles full-stack SSR routing using the exact standalone subpath folder layout
+    tanstackStartVite({
       server: { entry: "server" }
     }),
-    // 3. Compiles Tailwind v4 layers
+    // 3. Compiles Tailwind v4 core layers
     tailwindcss(),
-    // 4. Resolves path mapping rules
+    // 4. Resolves custom root paths like "@/*"
     tsconfigPaths(),
   ],
 });
