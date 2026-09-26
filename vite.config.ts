@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { tanstackRouterVite } from '@tanstack/router-plugin';
-import { tanstackStartVite } from '@tanstack/react-start/vite';
+import { tanstackStartVite } from '@tanstack/react-start';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     // 1. Handles routing code-generation
     tanstackRouterVite(),
-    // 2. Handles full-stack SSR routing using the correct plugin source
+    // 2. Handles full-stack SSR routing from the direct root package export
     tanstackStartVite({
       server: { entry: "server" }
     }),
