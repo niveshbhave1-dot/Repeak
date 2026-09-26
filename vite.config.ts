@@ -6,16 +6,15 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
-    // 1. TanStack Router plugin handles the code-generation for routing
+    // 1. Handles routing code-generation
     tanstackRouterVite(),
-    // 2. TanStack Start plugin handles the SSR and server routing
+    // 2. Handles full-stack SSR routing using the correct plugin source
     tanstackStartVite({
-      // Keeps your custom server wrapper intact
       server: { entry: "server" }
     }),
-    // 3. Re-inject Tailwind v4 support 
+    // 3. Compiles Tailwind v4 styles
     tailwindcss(),
-    // 4. Resolves path mappings like "@/*"
+    // 4. Resolves custom root paths like "@/*"
     tsconfigPaths(),
   ],
 });
