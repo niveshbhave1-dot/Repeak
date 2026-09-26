@@ -1,15 +1,14 @@
 import { defineConfig } from 'vite';
-import { tanstackStart } from '@tanstack/react-start/plugin';
+import { tanstackStartVite } from '@tanstack/react-start/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
-    // 1. The official, stable orchestrator for this TanStack Start framework layer
-    tanstackStart(),
-    // 2. Compiles Tailwind CSS v4 layers
+    tanstackStartVite({
+      server: { entry: "server" }
+    }),
     tailwindcss(),
-    // 3. Resolves asset mappings like "@/*"
     tsconfigPaths(),
   ],
 });
